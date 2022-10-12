@@ -17,3 +17,7 @@ func Copy(objectList []filemodels.Object, destination string) error {
 	}
 	return nil
 }
+
+func Create(path, name string) error {
+	return os.Mkdir(path+"/"+name, os.ModePerm)
+}
