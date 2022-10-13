@@ -11,6 +11,8 @@ func Delete(path string, withContent bool) error {
 		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
+
+		return nil
 	}
 
 	return os.Remove(path)
