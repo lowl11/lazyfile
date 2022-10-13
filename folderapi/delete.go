@@ -3,11 +3,13 @@ package folderapi
 import "os"
 
 func Delete(path string, withContent bool) error {
+	if NotExists(path) {
+		return nil
+	}
+
 	if withContent {
-		if Exists(path) {
-			if err := os.RemoveAll(path); err != nil {
-				return err
-			}
+		if err := os.RemoveAll(path); err != nil {
+			return err
 		}
 	}
 
