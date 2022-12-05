@@ -74,8 +74,16 @@ func Exist(folderPath string) bool {
 
 // NotExist folder
 func NotExist(folderPath string) bool {
-	_, err := os.Stat(folderPath)
-	return os.IsNotExist(err)
+	stat, err := os.Stat(folderPath)
+	if err != nil {
+		return false
+	}
+
+	if stat == nil {
+		return os.IsNotExist(err)
+	}
+
+	return stat == nil
 }
 
 /*

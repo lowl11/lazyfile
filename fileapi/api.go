@@ -75,6 +75,10 @@ func NotExist(filePath string) bool {
 		return false
 	}
 
+	if stat == nil {
+		return os.IsNotExist(err)
+	}
+
 	return stat == nil
 }
 
