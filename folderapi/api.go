@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strings"
 )
 
 // Copy given objects list and create them in given path
@@ -55,6 +56,14 @@ func Delete(path string, withContent bool) error {
 	}
 
 	return os.Remove(path)
+}
+
+/*
+	Rename folder name
+*/
+func Rename(oldPath, newName string) error {
+	newPath := strings.ReplaceAll(oldPath, filepath.Base(oldPath), newName)
+	return os.Rename(oldPath, newPath)
 }
 
 // Exist folder

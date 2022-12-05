@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 /*
@@ -39,6 +41,21 @@ func CreateFromFile(source, destination string) error {
 	}
 
 	return Create(destination, sourceBody)
+}
+
+/*
+	Delete file by given path
+*/
+func Delete(path string) error {
+	return os.Remove(path)
+}
+
+/*
+	Rename file
+*/
+func Rename(oldPath, newName string) error {
+	newPath := strings.ReplaceAll(oldPath, filepath.Base(oldPath), newName)
+	return os.Rename(oldPath, newPath)
 }
 
 // Exist check if file exist
