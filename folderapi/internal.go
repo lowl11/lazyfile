@@ -5,14 +5,6 @@ import (
 	"strings"
 )
 
-func PathByWindows(path string) string {
-	return replaceAllDashes(path, "\\")
-}
-
-func PathByUnix(path string) string {
-	return replaceAllDashes(path, "/")
-}
-
 func replaceAllDashes(path, delimiter string) string {
 	path = strings.ReplaceAll(path, "/", delimiter)
 	path = strings.ReplaceAll(path, "\\", delimiter)

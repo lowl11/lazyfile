@@ -3,11 +3,83 @@ package folderapi
 import (
 	"github.com/lowl11/lazyfile/filemodels"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 )
 
-func GetObjects(path string) ([]filemodels.Object, error) {
+// Copy given objects list and create them in given path
+func Copy(objectList []filemodels.Object, destination string) error {
+	if NotExist(destination) {
+		if err := os.Mkdir(destination, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	for _, objectItem := range objectList {
+		_ = objectItem
+	}
+	return nil
+}
+
+// Create folder in given path
+func Create(path, name string) error {
+	return os.Mkdir(path+"/"+name, os.ModePerm)
+}
+
+/*
+	Delete folder
+	Given flag withContent delete all files in folder
+*/
+func Delete(path string, withContent bool) error {
+	if NotExist(path) {
+		return nil
+	}
+
+	if withContent {
+		if err := os.RemoveAll(path); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return os.Remove(path)
+}
+
+// Exist folder
+func Exist(folderPath string) bool {
+	_, err := os.Stat(folderPath)
+	return !os.IsNotExist(err)
+}
+
+// NotExist folder
+func NotExist(folderPath string) bool {
+	_, err := os.Stat(folderPath)
+	return os.IsNotExist(err)
+}
+
+/*
+	PathByWindows give path with Windows format
+	Windows path contains reverse slashes - \
+*/
+func PathByWindows(path string) string {
+	return replaceAllDashes(path, "\\")
+}
+
+/*
+	PathByUnix give path with Unix (Linux & MacOS) format
+	Unix path contains default slashed - /
+*/
+func PathByUnix(path string) string {
+	return replaceAllDashes(path, "/")
+}
+
+/*
+	Objects return list of files & folders in custom model
+	Also returned list of objects sorted by alphabet and "isDirectory" flag
+*/
+func Objects(path string) ([]filemodels.Object, error) {
 	objectList := make([]filemodels.Object, 0)
 	folderObjects, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -23,7 +95,7 @@ func GetObjects(path string) ([]filemodels.Object, error) {
 			Name:        objectName,
 			Path:        objectPath,
 			IsFolder:    isFolder,
-			ObjectCount: GetCount(objectPath),
+			ObjectCount: Count(objectPath),
 		})
 	}
 
@@ -45,7 +117,11 @@ func GetObjects(path string) ([]filemodels.Object, error) {
 	return objectList, nil
 }
 
-func GetObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
+/*
+	ObjectsWithDepth return list of files & folders in custom model with all children
+	Also returned list of objects sorted by alphabet and "isDirectory" flag
+*/
+func ObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
 	objectList := make([]filemodels.Object, 0)
 	folderObjects, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -62,11 +138,11 @@ func GetObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
 		objectName := objectItem.Name()
 		isFolder := objectItem.IsDir()
 		objectPath := buildObjectPath(path, objectName)
-		objectCount := GetCount(objectPath)
+		objectCount := Count(objectPath)
 
 		// getting children
 		children := make([]filemodels.Object, 0, objectCount)
-		children, err = GetObjectsWithDepth(objectPath, memoryPath)
+		children, err = ObjectsWithDepth(objectPath, memoryPath)
 		if err != nil {
 			children = make([]filemodels.Object, 0, objectCount)
 		}
@@ -108,7 +184,8 @@ func GetObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
 	return objectList, nil
 }
 
-func GetCount(path string) int {
+// Count return count of folder objects
+func Count(path string) int {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return 0
