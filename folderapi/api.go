@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 )
 
@@ -22,14 +23,23 @@ func Copy(objectList []filemodels.Object, destination string) error {
 	return nil
 }
 
-// Create folder in given path
+/*
+	Create folder in given path
+	If folder already exist does nothing
+*/
 func Create(path, name string) error {
-	return os.Mkdir(path+"/"+name, os.ModePerm)
+	newFolderPath := path + "/" + name
+	if Exist(newFolderPath) {
+		return nil
+	}
+
+	return os.Mkdir(newFolderPath, os.ModePerm)
 }
 
 /*
 	Delete folder
 	Given flag withContent delete all files in folder
+	If folder does not exist does nothing
 */
 func Delete(path string, withContent bool) error {
 	if NotExist(path) {
@@ -73,6 +83,18 @@ func PathByWindows(path string) string {
 */
 func PathByUnix(path string) string {
 	return replaceAllDashes(path, "/")
+}
+
+/*
+	Path returns path depends on running OS
+	By default use PathByUnix
+*/
+func Path(path string) string {
+	if runtime.GOOS == "windows" {
+		return PathByWindows(path)
+	}
+
+	return PathByUnix(path)
 }
 
 /*

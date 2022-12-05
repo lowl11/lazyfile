@@ -6,10 +6,13 @@ import (
 	"os"
 )
 
-// Create file in given path
+/*
+	Create file in given path
+	If file already exist does nothing
+*/
 func Create(path string, body []byte) error {
 	if Exist(path) {
-		return errors.New("file already exist")
+		return nil
 	}
 
 	return ioutil.WriteFile(path, body, os.ModePerm)
@@ -18,6 +21,8 @@ func Create(path string, body []byte) error {
 /*
 	CreateFromFile create file
 	Takes content from one file and create new with given path
+	If source file does not exist returns error
+	If destination path already exist does nothing
 */
 func CreateFromFile(source, destination string) error {
 	if NotExist(source) {
@@ -25,7 +30,7 @@ func CreateFromFile(source, destination string) error {
 	}
 
 	if Exist(destination) {
-		return errors.New("destination file already exist")
+		return nil
 	}
 
 	sourceBody, err := ioutil.ReadFile(source)
@@ -48,12 +53,12 @@ func Exist(filePath string) bool {
 
 // NotExist like Exist but opposite
 func NotExist(filePath string) bool {
-	_, err := os.Stat(filePath)
+	stat, err := os.Stat(filePath)
 	if err != nil {
 		return false
 	}
 
-	return os.IsNotExist(err)
+	return stat == nil
 }
 
 // Read get content of file
