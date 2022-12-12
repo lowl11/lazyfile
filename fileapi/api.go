@@ -91,3 +91,13 @@ func Read(path string) ([]byte, error) {
 
 	return content, nil
 }
+
+// Empty is file content empty
+func Empty(path string) bool {
+	bytes, _ := Read(path)
+	if bytes == nil {
+		return true
+	}
+
+	return len(bytes) == 0
+}

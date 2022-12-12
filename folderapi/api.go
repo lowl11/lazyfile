@@ -232,3 +232,8 @@ func Count(path string) int {
 
 	return len(files)
 }
+
+// Empty is folder empty
+func Empty(path string) bool {
+	return Count(path) == 0
+}
