@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 )
@@ -84,34 +83,6 @@ func NotExist(folderPath string) bool {
 	}
 
 	return stat == nil
-}
-
-/*
-	PathByWindows give path with Windows format
-	Windows path contains reverse slashes - \
-*/
-func PathByWindows(path string) string {
-	return replaceAllDashes(path, "\\")
-}
-
-/*
-	PathByUnix give path with Unix (Linux & MacOS) format
-	Unix path contains default slashed - /
-*/
-func PathByUnix(path string) string {
-	return replaceAllDashes(path, "/")
-}
-
-/*
-	Path returns path depends on running OS
-	By default use PathByUnix
-*/
-func Path(path string) string {
-	if runtime.GOOS == "windows" {
-		return PathByWindows(path)
-	}
-
-	return PathByUnix(path)
 }
 
 /*
