@@ -1,8 +1,10 @@
 package fileapi
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +20,31 @@ func Create(path string, body []byte) error {
 	}
 
 	return ioutil.WriteFile(path, body, os.ModePerm)
+}
+
+/*
+	Append add body to the already existing content & file
+*/
+func Append(path string, body []byte) error {
+	if !Exist(path) {
+		return Create(path, bytes.TrimSpace(body))
+	}
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err = file.Close(); err != nil {
+			log.Println("Close file error: ", path)
+		}
+	}()
+
+	if _, err = file.Write(body); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*
