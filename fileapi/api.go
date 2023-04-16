@@ -48,6 +48,21 @@ func Append(path string, body []byte) error {
 }
 
 /*
+	Replace change content inside to another one
+*/
+func Replace(path string, newContent []byte) error {
+	if !Exist(path) {
+		return nil
+	}
+
+	if err := Delete(path); err != nil {
+		return err
+	}
+
+	return Create(path, newContent)
+}
+
+/*
 	CreateFromFile create file
 	Takes content from one file and create new with given path
 	If source file does not exist returns error
