@@ -6,6 +6,8 @@ type IManager interface {
 	IFolder
 
 	ThreadSafe() IManager
+	FolderByPath(path string) (IFolder, error)
+	FileByPath(path string) (IFile, error)
 }
 
 type IFolder interface {

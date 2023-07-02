@@ -14,6 +14,37 @@ func (manager *Manager) ThreadSafe() interfaces.IManager {
 	return manager
 }
 
+func (manager *Manager) FolderByPath(path string) (interfaces.IFolder, error) {
+	manager.lock()
+	defer manager.unlock()
+
+	if !folderapi.Exist(manager.path + "/" + path) {
+		return nil, errors.FolderNotExist
+	}
+
+	return New(manager.path + "/" + path), nil
+}
+
+func (manager *Manager) FileByPath(path string) (interfaces.IFile, error) {
+	manager.lock()
+	defer manager.unlock()
+
+	content, err := fileapi.Read(manager.path + "/" + path)
+	if err != nil {
+		return nil, err
+	}
+
+	pathArray := strings.Split(path, "/")
+	var name string
+	if len(pathArray) > 1 {
+		name = pathArray[len(pathArray)-1]
+	} else {
+		name = path
+	}
+
+	return domain.NewFile(name, content, manager.path+"/"+path), nil
+}
+
 func (manager *Manager) Path() string {
 	return manager.path
 }
