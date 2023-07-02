@@ -6,8 +6,15 @@ type IManager interface {
 	IFolder
 
 	ThreadSafe() IManager
-	FolderByPath(path string) (IFolder, error)
+
 	FileByPath(path string) (IFile, error)
+	AddFileByPath(path string, content []byte) error
+	UpdateFileByPath(path string, content []byte) error
+	DeleteFileByPath(path string) error
+
+	FolderByPath(path string) (IFolder, error)
+	AddFolderByPath(path, name string) error
+	DeleteFolderByPath(path string, force bool) error
 }
 
 type IFolder interface {
@@ -23,8 +30,7 @@ type IFolder interface {
 
 	Folder(name string) (IFolder, error)
 	AddFolder(name string) (IFolder, error)
-	DeleteFolder(name string) error
-	DeleteFolderForce(name string) error
+	DeleteFolder(name string, force bool) error
 }
 
 type IFile interface {

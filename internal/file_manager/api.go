@@ -14,21 +14,6 @@ func (manager *Manager) ThreadSafe() interfaces.IManager {
 	return manager
 }
 
-func (manager *Manager) FolderByPath(path string) (interfaces.IFolder, error) {
-	manager.lock()
-	defer manager.unlock()
-
-	if !folderapi.Exist(manager.path + "/" + path) {
-		return nil, errors.FolderNotExist
-	}
-
-	newFolder := New(manager.path + "/" + path)
-	if manager.threadSafe {
-		newFolder.ThreadSafe()
-	}
-	return newFolder, nil
-}
-
 func (manager *Manager) FileByPath(path string) (interfaces.IFile, error) {
 	manager.lock()
 	defer manager.unlock()
@@ -47,6 +32,63 @@ func (manager *Manager) FileByPath(path string) (interfaces.IFile, error) {
 	}
 
 	return domain.NewFile(name, content, manager.path+"/"+path), nil
+}
+
+func (manager *Manager) AddFileByPath(path string, content []byte) error {
+	manager.lock()
+	defer manager.unlock()
+
+	if fileapi.Exist(manager.path + "/" + path) {
+		return errors.FileAlreadyExist
+	}
+
+	return fileapi.Create(manager.path+"/"+path, content)
+}
+
+func (manager *Manager) UpdateFileByPath(path string, content []byte) error {
+	manager.lock()
+	defer manager.unlock()
+
+	return fileapi.Update(path, content)
+}
+
+func (manager *Manager) DeleteFileByPath(path string) error {
+	manager.lock()
+	defer manager.unlock()
+	return fileapi.Delete(manager.path + "/" + path)
+}
+
+func (manager *Manager) FolderByPath(path string) (interfaces.IFolder, error) {
+	manager.lock()
+	defer manager.unlock()
+
+	if !folderapi.Exist(manager.path + "/" + path) {
+		return nil, errors.FolderNotExist
+	}
+
+	newFolder := New(manager.path + "/" + path)
+	if manager.threadSafe {
+		newFolder.ThreadSafe()
+	}
+	return newFolder, nil
+}
+
+func (manager *Manager) AddFolderByPath(path, name string) error {
+	manager.lock()
+	defer manager.unlock()
+
+	if folderapi.Exist(manager.path + "/" + path) {
+		return errors.FolderAlreadyExist
+	}
+
+	return folderapi.Create(manager.path+"/"+path, name)
+}
+
+func (manager *Manager) DeleteFolderByPath(path string, force bool) error {
+	manager.lock()
+	defer manager.unlock()
+
+	return folderapi.Delete(path, force)
 }
 
 func (manager *Manager) Path() string {
@@ -102,6 +144,9 @@ func (manager *Manager) DeleteFile(name string) error {
 }
 
 func (manager *Manager) Folder(name string) (interfaces.IFolder, error) {
+	manager.lock()
+	defer manager.unlock()
+
 	if !folderapi.Exist(name) {
 		return nil, errors.FolderNotExist
 	}
@@ -128,16 +173,9 @@ func (manager *Manager) AddFolder(name string) (interfaces.IFolder, error) {
 	return newFolder, nil
 }
 
-func (manager *Manager) DeleteFolder(name string) error {
+func (manager *Manager) DeleteFolder(name string, force bool) error {
 	manager.lock()
 	defer manager.unlock()
 
-	return folderapi.Delete(manager.path+"/"+name, false)
-}
-
-func (manager *Manager) DeleteFolderForce(name string) error {
-	manager.lock()
-	defer manager.unlock()
-
-	return folderapi.Delete(manager.path+"/"+name, true)
+	return folderapi.Delete(manager.path+"/"+name, force)
 }
