@@ -22,7 +22,11 @@ func (manager *Manager) FolderByPath(path string) (interfaces.IFolder, error) {
 		return nil, errors.FolderNotExist
 	}
 
-	return New(manager.path + "/" + path), nil
+	newFolder := New(manager.path + "/" + path)
+	if manager.threadSafe {
+		newFolder.ThreadSafe()
+	}
+	return newFolder, nil
 }
 
 func (manager *Manager) FileByPath(path string) (interfaces.IFile, error) {
@@ -102,7 +106,11 @@ func (manager *Manager) Folder(name string) (interfaces.IFolder, error) {
 		return nil, errors.FolderNotExist
 	}
 
-	return New(manager.path + "/" + name), nil
+	newFolder := New(manager.path + "/" + name)
+	if manager.threadSafe {
+		newFolder.ThreadSafe()
+	}
+	return newFolder, nil
 }
 
 func (manager *Manager) AddFolder(name string) (interfaces.IFolder, error) {
@@ -113,7 +121,11 @@ func (manager *Manager) AddFolder(name string) (interfaces.IFolder, error) {
 		return nil, err
 	}
 
-	return New(manager.path + "/" + name), nil
+	newFolder := New(manager.path + "/" + name)
+	if manager.threadSafe {
+		newFolder.ThreadSafe()
+	}
+	return newFolder, nil
 }
 
 func (manager *Manager) DeleteFolder(name string) error {
