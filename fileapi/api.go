@@ -2,7 +2,7 @@ package fileapi
 
 import (
 	"bytes"
-	"errors"
+	"github.com/lowl11/lazyfile/data/errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,10 +16,33 @@ import (
 */
 func Create(path string, body []byte) error {
 	if Exist(path) {
-		return nil
+		return errors.FileAlreadyExist
 	}
 
 	return ioutil.WriteFile(path, body, os.ModePerm)
+}
+
+func Update(path string, body []byte) error {
+	if !Exist(path) {
+		return errors.FileNotFound
+	}
+
+	if err := os.Truncate(path, 0); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_RDWR, 0644)
+
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err = file.Write(body); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*
@@ -70,7 +93,7 @@ func Replace(path string, newContent []byte) error {
 */
 func CreateFromFile(source, destination string) error {
 	if NotExist(source) {
-		return errors.New("source file does not exist")
+		return errors.FileSourceNotFound
 	}
 
 	if Exist(destination) {
@@ -126,6 +149,15 @@ func NotExist(filePath string) bool {
 
 // Read get content of file
 func Read(path string) ([]byte, error) {
+	if !Exist(path) {
+		return nil, errors.FileNotFound
+	}
+
+	stat, err := os.Stat(path)
+	if err == nil && stat.IsDir() {
+		return nil, errors.FileIsFolder
+	}
+
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -136,10 +168,10 @@ func Read(path string) ([]byte, error) {
 
 // Empty is file content empty
 func Empty(path string) bool {
-	bytes, _ := Read(path)
-	if bytes == nil {
+	content, _ := Read(path)
+	if content == nil {
 		return true
 	}
 
-	return len(bytes) == 0
+	return len(content) == 0
 }

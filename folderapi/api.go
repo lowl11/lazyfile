@@ -1,7 +1,7 @@
 package folderapi
 
 import (
-	"github.com/lowl11/lazyfile/filemodels"
+	"github.com/lowl11/lazyfile/data/domain"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,7 +10,7 @@ import (
 )
 
 // Copy given objects list and create them in given path
-func Copy(objectList []filemodels.Object, destination string) error {
+func Copy(objectList []domain.Object, destination string) error {
 	if NotExist(destination) {
 		if err := os.Mkdir(destination, os.ModePerm); err != nil {
 			return err
@@ -89,8 +89,8 @@ func NotExist(folderPath string) bool {
 	Objects return list of files & folders in custom model
 	Also returned list of objects sorted by alphabet and "isDirectory" flag
 */
-func Objects(path string) ([]filemodels.Object, error) {
-	objectList := make([]filemodels.Object, 0)
+func Objects(path string) ([]domain.Object, error) {
+	objectList := make([]domain.Object, 0)
 	folderObjects, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func Objects(path string) ([]filemodels.Object, error) {
 		isFolder := objectItem.IsDir()
 		objectPath := buildObjectPath(path, objectName)
 
-		objectList = append(objectList, filemodels.Object{
+		objectList = append(objectList, domain.Object{
 			Name:        objectName,
 			Path:        objectPath,
 			IsFolder:    isFolder,
@@ -131,8 +131,8 @@ func Objects(path string) ([]filemodels.Object, error) {
 	ObjectsWithDepth return list of files & folders in custom model with all children
 	Also returned list of objects sorted by alphabet and "isDirectory" flag
 */
-func ObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
-	objectList := make([]filemodels.Object, 0)
+func ObjectsWithDepth(path, memoryPath string) ([]domain.Object, error) {
+	objectList := make([]domain.Object, 0)
 	folderObjects, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -151,10 +151,10 @@ func ObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
 		objectCount := Count(objectPath)
 
 		// getting children
-		children := make([]filemodels.Object, 0, objectCount)
+		children := make([]domain.Object, 0, objectCount)
 		children, err = ObjectsWithDepth(objectPath, memoryPath)
 		if err != nil {
-			children = make([]filemodels.Object, 0, objectCount)
+			children = make([]domain.Object, 0, objectCount)
 		}
 
 		// memory path
@@ -166,7 +166,7 @@ func ObjectsWithDepth(path, memoryPath string) ([]filemodels.Object, error) {
 		//objectMemoryPath := buildMemoryObjectPath(memoryPath, objectName)
 		objectMemoryPath := memoryPath
 
-		objectList = append(objectList, filemodels.Object{
+		objectList = append(objectList, domain.Object{
 			Name:         objectName,
 			Path:         objectPath,
 			RelativePath: objectMemoryPath,

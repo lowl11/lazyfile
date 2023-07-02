@@ -1,4 +1,4 @@
-package filemodels
+package domain
 
 import (
 	"errors"
