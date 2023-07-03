@@ -2,6 +2,7 @@ package folderapi
 
 import (
 	"github.com/lowl11/lazyfile/data/domain"
+	"github.com/lowl11/lazyfile/internal/path_helper"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,26 +10,12 @@ import (
 	"strings"
 )
 
-// Copy given objects list and create them in given path
-func Copy(objectList []domain.Object, destination string) error {
-	if NotExist(destination) {
-		if err := os.Mkdir(destination, os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	for _, objectItem := range objectList {
-		_ = objectItem
-	}
-	return nil
-}
-
 /*
 	Create folder in given path
 	If folder already exist does nothing
 */
 func Create(path, name string) error {
-	newFolderPath := path + "/" + name
+	newFolderPath := path_helper.Build(path, name)
 	if Exist(newFolderPath) {
 		return nil
 	}
@@ -132,7 +119,7 @@ func Objects(path string) ([]domain.Object, error) {
 	Also returned list of objects sorted by alphabet and "isDirectory" flag
 */
 func ObjectsWithDepth(path, memoryPath string) ([]domain.Object, error) {
-	objectList := make([]domain.Object, 0)
+	objectList := make([]domain.Object, 0, 100)
 	folderObjects, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err

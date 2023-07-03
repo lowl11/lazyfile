@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"github.com/lowl11/lazyfile/fileapi"
+	"github.com/lowl11/lazyfile/internal/path_helper"
 )
 
 type File struct {
@@ -57,7 +58,7 @@ func (file *File) Update(content []byte) error {
 		return errors.New("file destroyed")
 	}
 
-	if err := fileapi.Update(file.path+"/"+file.name, content); err != nil {
+	if err := fileapi.Update(path_helper.Build(file.path, file.name), content); err != nil {
 		return err
 	}
 
@@ -66,7 +67,7 @@ func (file *File) Update(content []byte) error {
 }
 
 func (file *File) Delete() error {
-	if err := fileapi.Delete(file.path + "/" + file.name); err != nil {
+	if err := fileapi.Delete(path_helper.Build(file.path, file.name)); err != nil {
 		return err
 	}
 	file.destroy()

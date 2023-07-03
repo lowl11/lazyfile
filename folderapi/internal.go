@@ -12,9 +12,9 @@ func replaceAllDashes(path, delimiter string) string {
 }
 
 func buildObjectPath(path, name string) string {
-	return fmt.Sprintf("%s/%s", path, name)
-}
+	builder := strings.Builder{}
+	builder.Grow(len(path) + len(name) + 1)
 
-func buildMemoryObjectPath(relativePath, objectName string) string {
-	return fmt.Sprintf("%s/%s", relativePath, objectName)
+	_, _ = fmt.Fprintf(&builder, "%s/%s", path, name)
+	return builder.String()
 }
