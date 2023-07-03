@@ -15,6 +15,14 @@ func (manager *Manager) ThreadSafe() interfaces.IManager {
 	return manager
 }
 
+func (manager *Manager) Empty() bool {
+	if !folderapi.Exist(manager.path) {
+		return true
+	}
+
+	return folderapi.Empty(manager.path)
+}
+
 func (manager *Manager) Sync() error {
 	if !folderapi.Exist(manager.path) {
 		return errors.FolderNotExist
@@ -137,6 +145,58 @@ func (manager *Manager) List() ([]domain.Object, error) {
 	return folderapi.Objects(manager.path)
 }
 
+func (manager *Manager) FileList() ([]interfaces.IFile, error) {
+	manager.lock()
+	defer manager.unlock()
+
+	objects, err := folderapi.Objects(manager.path)
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]interfaces.IFile, 0)
+	for _, obj := range objects {
+		if obj.IsFolder {
+			continue
+		}
+
+		fileContent, err := fileapi.Read(path_helper.Build(manager.path, obj.Name))
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, domain.NewFile(obj.Name, fileContent, manager.path))
+	}
+
+	return list, nil
+}
+
+func (manager *Manager) FolderList() ([]interfaces.IFolder, error) {
+	manager.lock()
+	defer manager.unlock()
+
+	objects, err := folderapi.Objects(manager.path)
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]interfaces.IFolder, 0)
+	for _, obj := range objects {
+		if !obj.IsFolder {
+			continue
+		}
+
+		folder, err := manager.getFolder(obj.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, folder)
+	}
+
+	return list, nil
+}
+
 func (manager *Manager) File(name string) (interfaces.IFile, error) {
 	manager.lock()
 	defer manager.unlock()
@@ -174,18 +234,7 @@ func (manager *Manager) Folder(name string) (interfaces.IFolder, error) {
 	manager.lock()
 	defer manager.unlock()
 
-	folderName := path_helper.Build(manager.path, name)
-
-	if !folderapi.Exist(folderName) {
-		return nil, errors.FolderNotExist
-	}
-
-	newFolder := New(folderName)
-	if manager.threadSafe {
-		newFolder.ThreadSafe()
-	}
-
-	return newFolder, nil
+	return manager.getFolder(name)
 }
 
 func (manager *Manager) AddFolder(name string) (interfaces.IFolder, error) {

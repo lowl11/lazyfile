@@ -55,6 +55,9 @@ type IManager interface {
 }
 
 type IFolder interface {
+	// Empty is folder does not contain objects
+	Empty() bool
+
 	// Name returns name of folder
 	Name() string
 
@@ -76,6 +79,16 @@ type IFolder interface {
 		List returns list of objects which contains current folder (objects = files + folders)
 	*/
 	List() ([]domain.Object, error)
+
+	/*
+		FileList returns list of IFile objects which contains current folder
+	*/
+	FileList() ([]IFile, error)
+
+	/*
+		FolderList returns list of IFolder objects which contains current folder
+	*/
+	FolderList() ([]IFolder, error)
 
 	/*
 		File returns IFile object by name (with extension)
