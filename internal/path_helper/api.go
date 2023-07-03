@@ -18,3 +18,12 @@ func Build(args ...string) string {
 
 	return builder.String()
 }
+
+func GetFolderName(path string) (string, string) {
+	pathArray := strings.Split(path, "/")
+	if len(pathArray) == 1 {
+		return path, path
+	}
+
+	return strings.Join(pathArray[:len(pathArray)-1], "/"), pathArray[len(pathArray)-1]
+}

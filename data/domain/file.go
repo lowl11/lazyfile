@@ -2,6 +2,8 @@ package domain
 
 import (
 	"errors"
+	"fmt"
+	errors2 "github.com/lowl11/lazyfile/data/errors"
 	"github.com/lowl11/lazyfile/fileapi"
 	"github.com/lowl11/lazyfile/internal/path_helper"
 )
@@ -70,7 +72,8 @@ func (file *File) Delete() error {
 	if err := fileapi.Delete(path_helper.Build(file.path, file.name)); err != nil {
 		return err
 	}
-	file.destroy()
+
+	file.isDestroyed = true
 
 	return nil
 }
@@ -79,9 +82,15 @@ func (file *File) IsDestroyed() bool {
 	return file.isDestroyed
 }
 
-func (file *File) destroy() {
-	file.name = ""
-	file.path = ""
-	file.content = nil
-	file.isDestroyed = true
+func (file *File) Sync() error {
+	fmt.Println("sync:", path_helper.Build(file.path, file.name))
+	if !fileapi.Exist(path_helper.Build(file.path, file.name)) {
+		return errors2.FileNotFound
+	}
+
+	return nil
+}
+
+func (file *File) Restore() error {
+	return fileapi.Create(path_helper.Build(file.path, file.name), file.content)
 }

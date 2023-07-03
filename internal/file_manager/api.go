@@ -15,6 +15,22 @@ func (manager *Manager) ThreadSafe() interfaces.IManager {
 	return manager
 }
 
+func (manager *Manager) Sync() error {
+	if !folderapi.Exist(manager.path) {
+		return errors.FolderNotExist
+	}
+
+	return nil
+}
+
+func (manager *Manager) Restore() error {
+	if !folderapi.Exist(manager.path) {
+		return folderapi.Create(path_helper.GetFolderName(manager.path))
+	}
+
+	return nil
+}
+
 func (manager *Manager) FileByPath(path string) (interfaces.IFile, error) {
 	manager.lock()
 	defer manager.unlock()
@@ -158,14 +174,17 @@ func (manager *Manager) Folder(name string) (interfaces.IFolder, error) {
 	manager.lock()
 	defer manager.unlock()
 
-	if !folderapi.Exist(name) {
+	folderName := path_helper.Build(manager.path, name)
+
+	if !folderapi.Exist(folderName) {
 		return nil, errors.FolderNotExist
 	}
 
-	newFolder := New(path_helper.Build(manager.path, name))
+	newFolder := New(folderName)
 	if manager.threadSafe {
 		newFolder.ThreadSafe()
 	}
+
 	return newFolder, nil
 }
 

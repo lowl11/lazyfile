@@ -11,7 +11,7 @@ import (
 )
 
 /*
-	Create file in given path
+	Create file in given path.
 	If file already exist does nothing
 */
 func Create(path string, body []byte) error {
@@ -22,6 +22,9 @@ func Create(path string, body []byte) error {
 	return ioutil.WriteFile(path, body, os.ModePerm)
 }
 
+/*
+	Update updates file content
+*/
 func Update(path string, body []byte) error {
 	if !Exist(path) {
 		return errors.FileNotFound
@@ -86,10 +89,10 @@ func Replace(path string, newContent []byte) error {
 }
 
 /*
-	CreateFromFile create file
-	Takes content from one file and create new with given path
-	If source file does not exist returns error
-	If destination path already exist does nothing
+	CreateFromFile create file.
+	Takes content from one file and create new with given path.
+	If source file does not exist returns error.
+	If destination path already exist does nothing.
 */
 func CreateFromFile(source, destination string) error {
 	if NotExist(source) {
